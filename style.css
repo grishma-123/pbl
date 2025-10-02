@@ -1,0 +1,246 @@
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background-color: #f0f9ff;
+  text-align: center;
+  padding: 40px;
+  background-image: url('steth.jpeg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  height: 100vh;
+}
+
+.container {
+  background-color: #e1ecfb7b;
+  padding: 30px;
+  border-radius: 15px;
+  max-width: 1000px;
+  margin: auto;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+
+}
+
+
+h1 { color: #0077b6; margin:5px;}
+.tab-links a {
+  display: inline-block;
+  margin: 10px 15px;
+  padding: 12px 20px;
+  background-color: #00b4d8;
+  color: white;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: background-color 0.3s;
+}
+
+.tab-links a:hover { background-color: #0077b6; }
+
+.logo-container {
+  display: flex;
+  flex-direction: column; 
+  align-items: center;    
+  gap: 0px;               
+}
+
+.logo {
+  width: 110px;  
+  height: auto;
+}
+
+.button-grid {
+  display: flex; flex-wrap: wrap; justify-content: center;
+  gap: 12px; margin-top: 20px;
+}
+
+.button-grid button {
+  padding: 10px 15px; border: none; background-color: #00b4d8;
+  color: white; font-size: 14px; border-radius: 8px; cursor: pointer;
+}
+
+.button-grid button:hover { background-color: #0077b6; }
+input[type="text"], input[type="file"], input[type="email"], input[type="password"], select, textarea {
+  padding: 10px; width: 60%; border-radius: 6px; border: 1px solid #ccc; margin-top: 10px;
+}
+
+.container > button,
+.card > button {
+  padding: 10px 15px; margin-top: 10px; border-radius: 8px;
+  background-color: #00b4d8; color: white; border: none; cursor: pointer;
+}
+
+.container > button:hover,
+.card > button:hover {
+  background-color: #0096c7;
+  transition: background-color 0.3s;
+}
+
+select {
+  cursor: pointer;
+}
+
+/*
+.result-box {
+  margin-top: 30px; font-weight: bold; color: #333; min-height: 50px;
+  padding: 15px; background-color: #e6f7ff; border-radius: 10px;
+  box-shadow: inset 0 0 5px rgba(0,0,0,0.1);
+}
+*/
+
+a { color: #0077b6; text-decoration: underline; }
+
+a.special-word:hover {
+  color:#3eabe6;
+  transition: color 0.3s;
+}
+
+/*a:hover{color:#3eabe6; transition: color 0.3s;}*/
+.intro-section { margin-top: 30px; }
+
+label { display: block; margin-top: 15px; font-weight: 500; }
+
+hr { margin: 24px 0; border: 0; height: 1px; background: #e6f7ff; }
+
+.small { font-size: 12px; color: #555; }
+
+.card {
+  background:#f8fdff; border-radius:12px; padding:25px; margin:10px 0; text-align:left;
+  padding-left: 30px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+}
+.list { text-align:left; margin: 0 auto; max-width: 720px; }
+
+
+
+/*SYMPTOMS CSS*/
+
+body.symptoms-page .container {
+  background-image: url("dna.jpeg");
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+  border-radius: 15px;
+  padding: 30px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+.my-button {
+  display:grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  max-width: 1000px;
+}
+.my-button button{
+  width: 100%;
+  font-size: 17px;
+  padding: 12px 20px;
+  background-color: #ffffff;
+  color: black;
+  border: 1px solid #3f9fd3;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  text-align: left;
+  padding-left: 15px;
+  white-space: nowrap;
+}
+
+.my-button button:hover {
+  background-color: rgb(220, 235, 253)
+}
+
+body.no-bg {
+  background-image: none;
+  background-color: #d9e2efae;
+}
+
+/*Symptom info displaying card: */
+
+.symptom-card {
+  background: #f8fdff;
+  text-align: left;
+  padding: 20px;
+  margin: 20px 0;
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  font-family: Arial, sans-serif;
+}
+
+.symptom-card h2 {
+  text-transform: capitalize;
+  margin-bottom: 10px;
+  color: #000000;
+}
+
+.symptom-card p {
+  margin: 8px 0;
+  color: #000000;
+}
+
+.seriousness {
+  margin: 10px 0;
+}
+
+.seriousness-badge {
+  display: inline-block;
+  padding: 4px 7px;
+  border-radius: 20px;
+  font-size: 0.9em;
+  text-align: center;
+}
+
+/* color codes */
+.mild {
+  background-color: rgb(220 252 231); 
+  font-size: 14px;
+  color: rgb(22 163 74);
+}
+
+.moderate {
+background-color: rgb(255 237 213);
+color: rgb(234 88 12); 
+}
+
+.critical {
+ background-color: rgb(254 226 226);
+color: rgb(220 38 38);           
+}
+
+.unknown { 
+  background-color: #e5e7eb;
+  color: #374151;
+}
+
+.site-footer {
+  width: 97%;
+  position: absolute;
+  left: 0;
+  background-color: #d9e2efae; 
+  color: #000000;
+  text-align: center;
+  padding: 25px;
+  min-height: 27vh;
+  font-size: 14px;
+  border-top: 1px solid #b6b6b6;
+}
+
+.site-footer a {
+  color: #00b4d8; 
+  text-decoration: none;
+}
+
+.site-footer a:hover {
+  text-decoration: underline;
+}
+
+.disclaimer {
+  font-size: 12px;
+  color: #000000;
+  text-align: center;
+  margin-top: 20px;
+  padding: 10px;
+  border-top: 1px solid #b6b6b6;
+}
+
+/*#0077b6*/
+
+/*#e1ecfb7b*/

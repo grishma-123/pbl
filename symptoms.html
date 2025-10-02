@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>MediSym - Symptoms</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="symptoms-page no-bg">
+<div class="container">
+  <h1>Symptom Checker</h1>
+  <div class="tab-links">
+    <a href="dashboard.html">Dashboard</a>
+    <a href="info.html">Medical Information</a>
+    <a href="chat.html">Chat</a>
+  </div>
+
+  <p>Select a symptom below. Remedies are instant.</p>
+  <div id="buttons" class="my-button"></div>
+
+  <div class="card">
+    <label for="other">Other symptom (not in list):</label>
+    <input id="other" type="text" placeholder="Type e.g., muscle cramps">
+    <button onclick="checkOther()">Check</button>
+    <p class="small">Tip: For detailed conversation, continue in Chat.</p>
+  </div>
+
+  <div id="result"></div>
+</div>
+
+<br>
+
+<footer class="site-footer">
+  <div class="footer-content">
+    <p>© 2025 <strong>MediSym</strong>. Your trusted digital health assistant.</p>
+    <p>Contact: <a href="mailto:support@medisym.com">support@medisym.com</a></p>
+    <p class="disclaimer">
+      Disclaimer: This site is for informational purposes only. Always consult a doctor for medical advice.
+    </p>
+  </div>
+</footer>
+
+
+<script>
+// auth guard
+const user = JSON.parse(localStorage.getItem('loggedInUser') || 'null');
+if(!user) location.href = 'login.html';
+
+// 50 symptoms (keys) and simple knowledge base
+const KB = {
+  fever:{ s:'Moderate', d:'Often infection sign; monitor temperature.', r:'Rest, fluids, paracetamol; consult if >3 days or >102°F.' },
+  headache:{ s:'Mild', d:'Stress, dehydration, eye strain common causes.', r:'Hydrate, rest, reduce screen time.' },
+  cough:{ s:'Mild', d:'Irritation, cold, allergy; watch duration.', r:'Warm fluids, honey-ginger tea; consult if persistent.' },
+  cold:{ s:'Mild', d:'Viral upper respiratory infection.', r:'Rest, hydration, steam inhalation.' },
+  sore_throat:{ s:'Mild', d:'Viral or bacterial; pain swallowing.', r:'Warm saline gargles, lozenges.' },
+  runny_nose:{ s:'Mild', d:'Allergy or viral cold.', r:'Steam inhalation, antihistamine if needed.' },
+  chest_pain:{ s:'Critical', d:'Could be cardiac or muscular; evaluate urgently.', r:'Seek immediate medical help.' },
+  shortness_of_breath:{ s:'Critical', d:'Asthma, cardiac, infection; urgent if severe.', r:'Emergency care if acute.' },
+  dizziness:{ s:'Moderate', d:'Dehydration, vertigo, low BP.', r:'Sit/lie down, hydrate; consult if recurrent.' },
+  fatigue:{ s:'Mild', d:'Sleep, stress, anemia, thyroid.', r:'Sleep hygiene, balanced diet.' },
+  nausea:{ s:'Mild', d:'Gastric upset, migraine, pregnancy.', r:'Small sips water, bland diet.' },
+  vomiting:{ s:'Moderate', d:'Gastritis, infection; watch dehydration.', r:'ORS, small sips; consult if persistent.' },
+  diarrhea:{ s:'Moderate', d:'Infection/food poisoning.', r:'ORS, light diet; seek care if blood/dehydration.' },
+  constipation:{ s:'Mild', d:'Low fiber, dehydration.', r:'Fiber, fluids, gentle activity.' },
+  stomach_pain:{ s:'Moderate', d:'Indigestion, gas, gastritis.', r:'Warm water, light meals; avoid irritants.' },
+  acidity:{ s:'Mild', d:'GERD/diet triggers.', r:'Smaller meals, avoid spicy/fatty foods.' },
+  back_pain:{ s:'Mild', d:'Muscular strain, posture.', r:'Stretching, heat/cold packs.' },
+  neck_pain:{ s:'Mild', d:'Strain, posture.', r:'Gentle stretch, ergonomics.' },
+  joint_pain:{ s:'Moderate', d:'Arthritis, overuse.', r:'Rest, ice/heat, gentle exercise.' },
+  muscle_pain:{ s:'Mild', d:'Overuse, cramps.', r:'Hydration, gentle stretching.' },
+  rash:{ s:'Moderate', d:'Allergic, infection.', r:'Avoid triggers, mild antihistamine.' },
+  itching:{ s:'Mild', d:'Allergy, dryness.', r:'Moisturize, avoid irritants.' },
+  eye_redness:{ s:'Mild', d:'Allergy, conjunctivitis.', r:'Cold compress, hygiene.' },
+  ear_pain:{ s:'Moderate', d:'Infection, wax.', r:'Warm compress, consult if severe.' },
+  toothache:{ s:'Moderate', d:'Cavity, gum infection.', r:'Rinse salt water; dental visit.' },
+  bleeding_gums:{ s:'Moderate', d:'Gingivitis, deficiency.', r:'Oral hygiene; dental check.' },
+  palpitations:{ s:'Critical', d:'Arrhythmia, anxiety, thyroid.', r:'Urgent evaluation if with dizziness/chest pain.' },
+  fever_with_rash:{ s:'Critical', d:'Dengue/measles etc.', r:'Immediate medical evaluation.' },
+  nosebleed:{ s:'Moderate', d:'Dryness, trauma.', r:'Pinch nose, lean forward.' },
+  swelling_feet:{ s:'Moderate', d:'Fluid retention, cardiac/renal.', r:'Reduce salt; consult.' },
+  burning_urination:{ s:'Moderate', d:'UTI likely.', r:'Hydration; consider medical review.' },
+  frequent_urination:{ s:'Moderate', d:'UTI/diabetes.', r:'Hydration; evaluate if persistent.' },
+  dark_urine:{ s:'Mild', d:'Dehydration.', r:'Increase fluids.' },
+  menstrual_cramps:{ s:'Mild', d:'Common dysmenorrhea.', r:'Heat pad, hydration.' },
+  delayed_periods:{ s:'Moderate', d:'Hormonal, pregnancy.', r:'Track cycle; test if needed.' },
+  acne:{ s:'Mild', d:'Sebaceous overactivity.', r:'Gentle cleansing; avoid picking.' },
+  hair_fall:{ s:'Mild', d:'Stress, nutrition.', r:'Balanced diet; gentle care.' },
+  weight_loss:{ s:'Moderate', d:'Hyperthyroid, malabsorption.', r:'Medical evaluation if unexplained.' },
+  weight_gain:{ s:'Mild', d:'Diet, thyroid.', r:'Activity, nutrition check.' },
+  anxiety:{ s:'Moderate', d:'Stress response.', r:'Breathing, routine, support.' },
+  low_mood:{ s:'Moderate', d:'Situational/depression.', r:'Sleep, sunlight, talk to someone.' },
+  insomnia:{ s:'Mild', d:'Sleep hygiene issues.', r:'Regular schedule, limit screens.' },
+  sore_muscles:{ s:'Mild', d:'Overexertion.', r:'Rest, hydration.' },
+  dehydration:{ s:'Moderate', d:'Low fluids/electrolytes.', r:'ORS, water intake.' },
+  heat_exhaustion:{ s:'Critical', d:'Overheating risk.', r:'Cool down, hydrate, seek help.' },
+  cold_sweats:{ s:'Moderate', d:'Hypoglycemia/stress.', r:'Snack, check sugar if diabetic.' },
+  hand_tremor:{ s:'Moderate', d:'Caffeine, thyroid, neuro.', r:'Cut stimulants; evaluate if persistent.' },
+  allergy_sneeze:{ s:'Mild', d:'Allergic rhinitis.', r:'Avoid allergens; antihistamine.' },
+  wheezing:{ s:'Critical', d:'Asthma/airway narrowing.', r:'Urgent care if severe.' },
+  ankle_sprain:{ s:'Mild', d:'Ligament strain.', r:'RICE: rest, ice, compress, elevate.' }
+}; // 50 entries
+
+const names = Object.keys(KB);
+
+function makeButtons(){
+  const box = document.getElementById('buttons');
+  names.forEach(k=>{
+    const btn = document.createElement('button');
+    btn.textContent = k.replaceAll('_',' ').replace(/\b\w/g,m=>m.toUpperCase());
+    btn.classList.add('my-button');
+    btn.onclick = ()=> show(k);
+    box.appendChild(btn);
+  });
+}
+
+function show(key) {
+  const { s, d, r } = KB[key] || { s: 'Unknown', d: 'Not in list', r: 'Consult a doctor' };
+
+  let seriousnessClass = "";
+  if (s.toLowerCase() === "mild") seriousnessClass = "mild";
+  else if (s.toLowerCase() === "moderate") seriousnessClass = "moderate";
+  else if (s.toLowerCase() === "critical") seriousnessClass = "critical";
+  else seriousnessClass = "unknown";
+
+  document.getElementById('result').innerHTML =
+    `<div class="symptom-card">
+       <h2>${key.replaceAll('_',' ')}</h2>
+       
+       <p><strong>Seriousness:</strong> 
+         <span class="seriousness-badge ${seriousnessClass}">${s}</span>
+       </p>
+       
+       <p><strong>Description:</strong> ${d}</p>
+       <p><strong>Remedy:</strong> ${r}</p>
+     </div>`;
+
+  logSymptom(key);
+}
+
+
+/*function show(key){
+  const {s,d,r} = KB[key] || {s:'Unknown', d:'Not in list', r:'Consult a doctor'};
+  document.getElementById('result').innerHTML =
+    `<div><b>Symptom:</b> ${key.replaceAll('_',' ')}<br>
+     <b>Seriousness:</b> ${s}<br>
+     <b>Description:</b> ${d}<br>
+     <b>Remedy:</b> ${r}</div>`;
+  logSymptom(key);
+}
+  */
+function checkOther(){
+  const t = document.getElementById('other').value.trim();
+  if(!t) return;
+    const symptomName = t.charAt(0).toUpperCase() + t.slice(1);
+  document.getElementById('result').innerHTML =
+    `<div class="symptom-card">
+     <h2>${symptomName}</h2>
+     <p><strong>Seriousness:</strong>
+       <span class="seriousness-badge unknown">Unknown</span>
+     </p> 
+     <p><strong>Description:</strong> Not predefined.</p>
+     <p><strong>Remedy:</strong> Please ask your doctor in Chat.</p>
+     </div>`;
+  logSymptom(t.toLowerCase().replaceAll(' ','_'));
+}
+
+function logSymptom(key){
+  if(user.role!=='patient') return;
+  const logKey = `patient_symptoms_${user.id}`;
+  const arr = JSON.parse(localStorage.getItem(logKey) || '[]');
+  arr.push({ symptom:key, at: new Date().toISOString() });
+  localStorage.setItem(logKey, JSON.stringify(arr));
+}
+makeButtons();
+</script>
+</body>
+</html>

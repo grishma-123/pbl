@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>MediSym - Register</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="container">
+  <div class="logo-container">
+  <img src="logo.png" alt="Logo" class="logo">
+  <h1>MediSym</h1>
+</div>
+  <h2>Your Health Companion<h2>
+  <p>Create your account (Patient / Doctor).</p>
+
+     <div class="card">
+    <h3>Select Role</h3>
+    <select id="regRole">
+      <option value="patient">Patient</option>
+      <option value="doctor">Doctor</option>
+    </select>
+  </div>
+
+  <div class="card">
+    <h3>Register</h3>
+
+ 
+
+    <input type="text" id="regName" placeholder="Full Name">
+    <input type="email" id="regEmail" placeholder="Email">
+    <input type="password" id="regPassword" placeholder="Password">
+  
+    <button onclick="register()">Register</button>
+    <p class="small">Already have an account? <a href="login.html" class="special-word">Login here</a>.</p>
+      </div>
+</div>
+
+<script>
+// --- simple storage helpers ---
+const LS = {
+  get: (k, d=undefined) => JSON.parse(localStorage.getItem(k) || JSON.stringify(d)),
+  set: (k, v) => localStorage.setItem(k, JSON.stringify(v))
+};
+
+// seed one doctor on first visit
+(function seed(){
+  const seeded = LS.get('seeded', false);
+  if (!seeded) {
+    const users = LS.get('users', []);
+    users.push({ id: Date.now(), name:'Dr. Smith', email:'dr@demo.com', password:'demo', role:'doctor' });
+    LS.set('users', users);
+    LS.set('seeded', true);
+    console.log('Seeded demo doctor: dr@demo.com / demo');
+  }
+})();
+
+function register(){
+  const name = document.getElementById('regName').value.trim();
+  const email = document.getElementById('regEmail').value.trim();
+  const password = document.getElementById('regPassword').value;
+  const role = document.getElementById('regRole').value;
+
+  if(!name || !email || !password) return alert('Fill all fields');
+
+  const users = LS.get('users', []);
+  if(users.find(u=>u.email===email)) return alert('Email already registered');
+
+  const user = { id: Date.now(), name, email, password, role };
+  users.push(user);
+  LS.set('users', users);
+  alert('Registered! Please login now.');
+  location.href = 'login.html';
+}
+</script>
+</body>
+</html>

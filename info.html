@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>MediSym - Medical Info</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="container" id="app">
+  <h1>Medical Information</h1>
+  <div class="tab-links">
+    <a href="dashboard.html">Dashboard</a>
+    <a href="symptoms.html">Symptom Checker</a>
+    <a href="chat.html">Chat</a>
+  </div>
+
+  <div id="roleBlock" class="card"></div>
+
+  <div class="card">
+    <h3>Basic Details</h3>
+    <label>Name</label><input id="name" type="text">
+    <label>Age</label><input id="age" type="text">
+    <label>Gender</label><input id="gender" type="text" placeholder="Male/Female/Other">
+    <label>Blood Group</label><input id="blood" type="text" placeholder="A+, O-, ...">
+    <label>Allergies</label><textarea id="allergies" rows="3"></textarea>
+    <label>Current Medications</label><textarea id="meds" rows="3"></textarea>
+    <label>Past History</label><textarea id="history" rows="3"></textarea>
+    <button onclick="saveInfo()">Save</button>
+  </div>
+
+  <div class="card">
+    <h3>Upload Reports</h3>
+    <input id="file" type="file" multiple>
+    <button onclick="upload()">Upload</button>
+    <div id="filesList" class="list"></div>
+  </div>
+</div>
+
+<br>
+
+<footer class="site-footer">
+  <div class="footer-content">
+    <p>© 2025 <strong>MediSym</strong>. Your trusted digital health assistant.</p>
+    <p>Contact: <a href="mailto:support@medisym.com">support@medisym.com</a></p>
+    <p class="disclaimer">
+      Disclaimer: This site is for informational purposes only. Always consult a doctor for medical advice.
+    </p>
+  </div>
+</footer>
+
+<script>
+const u = JSON.parse(localStorage.getItem('loggedInUser') || 'null');
+if(!u) location.href='login.html';
+
+const users = JSON.parse(localStorage.getItem('users') || '[]');
+let activePatientId = u.role==='patient' ? u.id : null;
+
+const roleBlock = document.getElementById('roleBlock');
+if(u.role==='doctor'){
+  const patients = users.filter(x=>x.role==='patient');
+  roleBlock.innerHTML = `<b>Doctor View:</b> Select a patient to view/update records.<br>
+    <select id="pSel">${patients.map(p=>`<option value="${p.id}">${p.name} (${p.email})</option>`).join('')}</select>
+    <button onclick="pick()">Load</button>`;
+} else {
+  roleBlock.innerHTML = `<b>Patient View:</b> Manage your own records.`;
+}
+
+function pick(){
+  activePatientId = parseInt(document.getElementById('pSel').value,10);
+  loadInfo();
+  loadFiles();
+}
+
+function keyInfo(){ return `medical_${activePatientId}`; }
+function keyFiles(){ return `files_${activePatientId}`; }
+
+function loadInfo(){
+  const o = JSON.parse(localStorage.getItem(keyInfo()) || '{}');
+  document.getElementById('name').value = o.name || (u.role==='patient' ? u.name : '');
+  document.getElementById('age').value = o.age || '';
+  document.getElementById('gender').value = o.gender || '';
+  document.getElementById('blood').value = o.blood || '';
+  document.getElementById('allergies').value = o.allergies || '';
+  document.getElementById('meds').value = o.meds || '';
+  document.getElementById('history').value = o.history || '';
+}
+function saveInfo(){
+  if(!activePatientId) activePatientId = u.id;
+  const o = {
+    name: document.getElementById('name').value.trim(),
+    age: document.getElementById('age').value.trim(),
+    gender: document.getElementById('gender').value.trim(),
+    blood: document.getElementById('blood').value.trim(),
+    allergies: document.getElementById('allergies').value.trim(),
+    meds: document.getElementById('meds').value.trim(),
+    history: document.getElementById('history').value.trim(),
+    updatedAt: new Date().toISOString()
+  };
+  localStorage.setItem(keyInfo(), JSON.stringify(o));
+  alert('Saved');
+}
+function loadFiles(){
+  const arr = JSON.parse(localStorage.getItem(keyFiles()) || '[]');
+  document.getElementById('filesList').innerHTML =
+    `<h4>Reports</h4>` + (arr.length? '':'<p class="small">No files yet</p>') +
+    arr.map((f,i)=>`<div class="card"><b>${f.name}</b> (${f.type}, ${Math.round(f.size/1024)} KB)
+    <div><a href="${f.data}" download="${f.name}">Download</a> • <a href="#" onclick="delFile(${i});return false;">Delete</a></div></div>`).join('');
+}
+function upload(){
+  const inp = document.getElementById('file');
+  if(!inp.files.length) return alert('Choose files');
+  const arr = JSON.parse(localStorage.getItem(keyFiles()) || '[]');
+  const files = Array.from(inp.files);
+  const readerJobs = files.map(f => new Promise(res=>{
+    const r = new FileReader();
+    r.onload = e => res({name:f.name, type:f.type, size:f.size, data:e.target.result});
+    r.readAsDataURL(f);
+  }));
+  Promise.all(readerJobs).then(all=>{
+    const merged = arr.concat(all);
+    localStorage.setItem(keyFiles(), JSON.stringify(merged));
+    inp.value='';
+    loadFiles();
+  });
+}
+function delFile(i){
+  const arr = JSON.parse(localStorage.getItem(keyFiles()) || '[]');
+  arr.splice(i,1);
+  localStorage.setItem(keyFiles(), JSON.stringify(arr));
+  loadFiles();
+}
+loadInfo(); loadFiles();
+</script>
+
+</body>
+</html>

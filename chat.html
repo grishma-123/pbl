@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>MediSym - Chat</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="container">
+  <h1>Chat</h1>
+  <div class="tab-links">
+    <a href="dashboard.html">Dashboard</a>
+    <a href="symptoms.html">Symptom Checker</a>
+    <a href="info.html">Medical Information</a>
+  </div>
+
+  <div id="roleUI" class="card"></div>
+
+  <div class="card">
+    <div id="history" class="list" style="max-height:300px; overflow:auto;"></div>
+    <input id="msg" type="text" placeholder="Type your message...">
+    <button onclick="send()">Send</button>
+  </div>
+</div>
+<br>
+
+<footer class="site-footer">
+  <div class="footer-content">
+    <p>© 2025 <strong>MediSym</strong>. Your trusted digital health assistant.</p>
+    <p>Contact: <a href="mailto:support@medisym.com">support@medisym.com</a></p>
+    <p class="disclaimer">
+      Disclaimer: This site is for informational purposes only. Always consult a doctor for medical advice.
+    </p>
+  </div>
+</footer>
+
+
+<script>
+const u = JSON.parse(localStorage.getItem('loggedInUser') || 'null');
+if(!u) location.href='login.html';
+const users = JSON.parse(localStorage.getItem('users') || '[]');
+
+let patientId = u.role==='patient' ? u.id : null;
+let doctorId = u.role==='doctor' ? u.id : null;
+
+function chatKey(){ return `chat_${patientId}_${doctorId}`; }
+
+function buildUI(){
+  if(u.role==='patient'){
+    const docs = users.filter(x=>x.role==='doctor');
+    document.getElementById('roleUI').innerHTML =
+      `Talking as <b>${u.name}</b> (patient).
+       <br>Select doctor:
+       <select id="sel">${docs.map(d=>`<option value="${d.id}">${d.name} (${d.email})</option>`).join('')}</select>
+       <button onclick="pickDoc()">Open</button>
+       <p class="small">Type any other symptoms not in the 50-list here, or ask questions.</p>`;
+  } else {
+    const pats = users.filter(x=>x.role==='patient');
+    document.getElementById('roleUI').innerHTML =
+      `Talking as <b>${u.name}</b> (doctor).
+       <br>Select patient:
+       <select id="sel">${pats.map(p=>`<option value="${p.id}">${p.name} (${p.email})</option>`).join('')}</select>
+       <button onclick="pickPat()">Open</button>`;
+  }
+}
+
+function pickDoc(){ doctorId = parseInt(document.getElementById('sel').value,10); load(); }
+function pickPat(){ patientId = parseInt(document.getElementById('sel').value,10); load(); }
+
+function load(){
+  if(patientId && doctorId){
+    const arr = JSON.parse(localStorage.getItem(chatKey()) || '[]');
+    document.getElementById('history').innerHTML =
+      arr.map(m=>`<div class="card"><b>${m.senderRole}:</b> ${m.text}<div class="small">${new Date(m.at).toLocaleString()}</div></div>`).join('') || '<p class="small">No messages yet.</p>';
+  }
+}
+
+function send(){
+  const box = document.getElementById('msg');
+  const text = box.value.trim();
+  if(!text) return;
+  if(!(patientId && doctorId)) return alert('Select counterpart first.');
+  const arr = JSON.parse(localStorage.getItem(chatKey()) || '[]');
+  arr.push({ text, at:new Date().toISOString(), senderId:u.id, senderRole:u.role });
+  localStorage.setItem(chatKey(), JSON.stringify(arr));
+  box.value=''; load();
+}
+
+buildUI(); load();
+</script>
+</body>
+</html>

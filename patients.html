@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>MediSym - Patients</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="container" id="app">
+  <h1>Patients (Doctor)</h1>
+  <div class="tab-links">
+    <a href="dashboard.html">Dashboard</a>
+    <a href="chat.html">Chat</a>
+    <a href="info.html">Medical Info</a>
+  </div>
+
+  <div id="guard" class="card"></div>
+  <div id="picker" class="card"></div>
+
+  <div id="content" style="display:none;">
+    <div class="card" id="med"></div>
+    <div class="card" id="files"></div>
+    <div class="card" id="logs"></div>
+  </div>
+</div>
+
+<br>
+
+<footer class="site-footer">
+  <div class="footer-content">
+    <p>© 2025 <strong>MediSym</strong>. Your trusted digital health assistant.</p>
+    <p>Contact: <a href="mailto:support@medisym.com">support@medisym.com</a></p>
+    <p class="disclaimer">
+      Disclaimer: This site is for informational purposes only. Always consult a doctor for medical advice.
+    </p>
+  </div>
+</footer>
+
+
+<script>
+const u = JSON.parse(localStorage.getItem('loggedInUser') || 'null');
+if(!u) location.href='login.html';
+if(u.role!=='doctor'){
+  document.getElementById('guard').innerHTML = 'This page is for doctors only.';
+} else {
+  document.getElementById('guard').innerHTML = 'Doctor access verified.';
+  const users = JSON.parse(localStorage.getItem('users') || '[]');
+  const pats = users.filter(x=>x.role==='patient');
+  document.getElementById('picker').innerHTML =
+    `Select patient: <select id="sel">${pats.map(p=>`<option value="${p.id}">${p.name} (${p.email})</option>`).join('')}</select>
+     <button onclick="load()">Load</button>`;
+}
+function load(){
+  const pid = parseInt(document.getElementById('sel').value,10);
+  if(!pid) return;
+  document.getElementById('content').style.display='block';
+  const info = JSON.parse(localStorage.getItem(`medical_${pid}`) || '{}');
+  document.getElementById('med').innerHTML =
+    `<h3>Medical Info</h3>
+     <div class="list">
+       <div><b>Name:</b> ${info.name||'-'}</div>
+       <div><b>Age:</b> ${info.age||'-'}</div>
+       <div><b>Gender:</b> ${info.gender||'-'}</div>
+       <div><b>Blood Group:</b> ${info.blood||'-'}</div>
+       <div><b>Allergies:</b> ${info.allergies||'-'}</div>
+       <div><b>Medications:</b> ${info.meds||'-'}</div>
+       <div><b>History:</b> ${info.history||'-'}</div>
+       <div class="small"><b>Updated:</b> ${info.updatedAt? new Date(info.updatedAt).toLocaleString(): '-'}</div>
+     </div>`;
+
+  const files = JSON.parse(localStorage.getItem(`files_${pid}`) || '[]');
+  document.getElementById('files').innerHTML =
+    `<h3>Reports</h3>` + (files.length? '':'<p class="small">No files</p>') +
+    files.map(f=>`<div class="card"><b>${f.name}</b> (${Math.round(f.size/1024)} KB) — <a href="${f.data}" download="${f.name}">Download</a></div>`).join('');
+
+  const logs = JSON.parse(localStorage.getItem(`patient_symptoms_${pid}`) || '[]').reverse();
+  document.getElementById('logs').innerHTML =
+    `<h3>Symptom Logs</h3>` + (logs.length? '':'<p class="small">No logs</p>') +
+    logs.map(l=>`<div class="card"><b>${l.symptom.replaceAll('_',' ')}</b><div class="small">${new Date(l.at).toLocaleString()}</div></div>`).join('');
+}
+</script>
+</body>
+</html>

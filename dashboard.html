@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>MediSym - Dashboard</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="container" id="app">
+ <div class="logo-container">
+  <img src="logo.png" alt="Logo" class="logo">
+  <h1>MediSym</h1>
+</div>
+
+  <p id="welcome"></p>
+
+  <div class="tab-links" id="links">
+    <a href="symptoms.html">Symptom Checker</a>
+    <a href="info.html">Medical Information</a>
+    <a href="chat.html">Chat</a>
+    <a href="patients.html" id="docOnly" style="display:none;">Patients (Doctor)</a>
+    <a href="login.html" onclick="logout()">Logout</a>
+  </div>
+
+  <div class="intro-section">
+    <h3>Symptom Checker</h3>
+    <p>Click any symptom button to see seriousness, description and home remedies. (50 preloaded)</p>
+    <h3>Medical Info</h3>
+    <p>Store your blood group, allergies, medications and upload past reports.</p>
+    <h3>Chat</h3>
+    <p>Patients can message doctors; doctors reply and view history.</p>
+    <div id="doctorHint" class="card" style="display:none;">
+      <b>Doctor Tools:</b> View all patients, see their medical records and symptom logs, and reply in chat.
+    </div>
+  </div>
+</div>
+
+<!--
+<div class="disclaimer">
+  Disclaimer: This platform is for informational purposes only and does not provide medical advice. Always consult a qualified doctor for diagnosis and treatment.
+</div>
+-->
+
+<br>
+
+<footer class="site-footer">
+  <div class="footer-content">
+    <p>© 2025 <strong>MediSym</strong>. Your trusted digital health assistant.</p>
+    <p>Contact: <a href="mailto:support@medisym.com">support@medisym.com</a></p>
+    <p class="disclaimer">
+      Disclaimer: This site is for informational purposes only. Always consult a doctor for medical advice.
+    </p>
+  </div>
+</footer>
+<script>
+const u = JSON.parse(localStorage.getItem('loggedInUser') || 'null');
+if(!u) location.href = 'login.html';
+document.getElementById('welcome').innerText = `Welcome, ${u.name} (${u.role})`;
+if(u.role==='doctor'){
+  document.getElementById('docOnly').style.display='inline-block';
+  document.getElementById('doctorHint').style.display='block';
+}
+function logout(){ localStorage.removeItem('loggedInUser'); }
+</script>
+</body>
+</html>
